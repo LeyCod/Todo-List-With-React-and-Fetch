@@ -6,48 +6,45 @@ import List from "./List.jsx";
 
 const TodoList = () => {
 	const [listTodo, setListTodo] = useState([]);
-	const [newTodo, setNewTodo] = useState("");
+	const [newTodo, setNewTodo] = useState({ label: "", done: false });
 
-	useEffect(() => {
-		getTodos()
-			.then((resp) => {
-				console.log(resp.ok); // will be true if the response is successfull
-				console.log(resp.status); // the status code = 200 or code = 400 etc.
-				console.log(resp.text()); // will try return the exact result as string
-				return resp.json(); // (returns promise) will try to parse the result as json as return a promise that you can .then for results
-			})
-			.then((data) => {
-				//here is were your code should start after the fetch finishes
-				console.log(data); //this will print on the console the exact object received from the server
-			})
-			.catch((error) => {
-				//error handling
-				console.log(error);
-			});
-	}, []);
+	const ApiGetTodos = async () => {
+		await getTodos()
+			.then((response) => response.json())
+			.then((data) => setListTodo(data))
+			.catch((error) => console.log(error));
+	};
+
+	const ApiPutData = async (newData) => {
+		await putTodos(newData)
+			.then((response) => response.json())
+			.then((data) => ApiGetTodos())
+			.catch((error) => console.log(error));
+	};
+
+	//useEffect hook
+
+	useEffect(() => ApiGetTodos(), []);
 
 	//Handel events
 
 	const handelClick = () => {
 		const newListTodo = [...listTodo, newTodo];
-		setListTodo(newListTodo);
-		setNewTodo("");
+		ApiPutData(newListTodo);
+		setNewTodo({ label: "", done: false });
 	};
 
 	const handelKeyEnter = (e) => {
 		if (e.code === "Enter") {
 			const newListTodo = [...listTodo, newTodo];
-			setListTodo(newListTodo);
-			setNewTodo("");
+			ApiPutData(newListTodo);
+			setNewTodo({ label: "", done: false });
 		}
 	};
 
-	// Delete Task
-
 	const deleteTask = (id) => {
-		console.log(id);
-		const deleteTodo = listTodo.filter((todo, index) => index !== id);
-		setListTodo(deleteTodo);
+		const newData = listTodo.filter((todo, index) => index !== id);
+		ApiPutData(newData);
 	};
 
 	return (
@@ -66,8 +63,13 @@ const TodoList = () => {
 								placeholder="Add New Todo"
 								aria-label="Add New Todo"
 								aria-describedby="basic-addon2"
-								value={newTodo}
-								onChange={(e) => setNewTodo(e.target.value)}
+								value={newTodo.label}
+								onChange={(e) =>
+									ApiPutData({
+										label: e.target.value,
+										done: false,
+									})
+								}
 								onKeyPress={handelKeyEnter}
 							/>
 							<button
@@ -83,7 +85,7 @@ const TodoList = () => {
 					<List
 						key={index}
 						id={index}
-						todo={todo}
+						todo={todo.label}
 						deleteTask={deleteTask}
 					/>
 				))}

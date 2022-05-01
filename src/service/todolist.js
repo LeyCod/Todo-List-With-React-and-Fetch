@@ -1,14 +1,14 @@
-const URL = "https://assets.breatheco.de/apis/fake/todos/user/emmanuelleyan";
+const URL = "https://assets.breatheco.de/apis/fake/todos/user/emmanuel";
 
 export const getTodos = () =>
 	fetch(URL, {
 		method: "GET",
 	});
 
-export const postTodos = () =>
+export const putTodos = () =>
 	fetch(URL, {
 		method: "PUT",
-		body: JSON.stringify(data),
+		body: JSON.stringify(listTodo),
 		headers: {
 			"Content-Type": "application/json",
 		},
